@@ -22,7 +22,8 @@ class UserController extends Controller
             }))
             ->when($request->is_active !== null, fn($q) => $q->where('is_active', $request->boolean('is_active')));
 
-        return response()->json($query->latest()->paginate(15));
+        $perPage = min((int) $request->input('per_page', 15), 1000);
+        return response()->json($query->latest()->paginate($perPage));
     }
 
     public function store(Request $request)

@@ -51,9 +51,14 @@ class ExamController extends Controller
     public function show(Request $request, Exam $exam)
     {
         $exam->load(['instructor:id,name', 'questions']);
-        // Instructors and admins see the raw passcode; students only see has_passcode (passcode stays hidden)
+        // Instructors and admins see the raw passcode + current assignments;
+        // students only see has_passcode (passcode stays hidden).
         if (!$request->user()?->isStudent()) {
             $exam->makeVisible(['passcode']);
+            $exam->load([
+                'assignedStudents:id,name,email',
+                'assignedGroups:id,name',
+            ]);
         }
         return response()->json($exam);
     }

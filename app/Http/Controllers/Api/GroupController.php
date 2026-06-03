@@ -13,13 +13,15 @@ class GroupController extends Controller
     {
         $user = $request->user();
         $query = Group::withCount('students')
+            ->when($request->boolean('with_student_ids'), fn($q) => $q->with('students:id'))
             ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%"));
 
         if ($user->isInstructor()) {
             $query->where('instructor_id', $user->id);
         }
 
-        return response()->json($query->latest()->paginate(15));
+        $perPage = min((int) $request->input('per_page', 15), 1000);
+        return response()->json($query->latest()->paginate($perPage));
     }
 
     public function store(Request $request)
