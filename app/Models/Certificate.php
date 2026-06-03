@@ -11,7 +11,11 @@ class Certificate extends Model
 
     protected $fillable = ['user_id', 'result_id', 'certificate_number', 'pdf_path', 'issued_at'];
 
-    protected $casts = ['issued_at' => 'datetime'];
+    protected $casts = [
+        'issued_at' => 'datetime',
+        'user_id'   => 'integer',
+        'result_id' => 'integer',
+    ];
 
     public function user()   { return $this->belongsTo(User::class); }
     public function result() { return $this->belongsTo(Result::class); }

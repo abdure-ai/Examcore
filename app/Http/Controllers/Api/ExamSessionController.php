@@ -101,7 +101,7 @@ class ExamSessionController extends Controller
     public function show(Request $request, StudentExamSession $session)
     {
         $user = $request->user();
-        if ($session->user_id !== $user->id && !$user->isInstructor() && !$user->isSuperAdmin()) {
+        if ((int) $session->user_id !== (int) $user->id && !$user->isInstructor() && !$user->isSuperAdmin()) {
             return response()->json(['message' => 'Unauthorized access to session.'], 403);
         }
 
@@ -169,7 +169,7 @@ class ExamSessionController extends Controller
     public function saveAnswer(Request $request, StudentExamSession $session)
     {
         $user = $request->user();
-        if ($session->user_id !== $user->id) {
+        if ((int) $session->user_id !== (int) $user->id) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
@@ -205,7 +205,7 @@ class ExamSessionController extends Controller
     public function submit(Request $request, StudentExamSession $session)
     {
         $user = $request->user();
-        if ($session->user_id !== $user->id) {
+        if ((int) $session->user_id !== (int) $user->id) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
@@ -241,7 +241,7 @@ class ExamSessionController extends Controller
     public function auditCheat(Request $request, StudentExamSession $session)
     {
         $user = $request->user();
-        if ($session->user_id !== $user->id) {
+        if ((int) $session->user_id !== (int) $user->id) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 

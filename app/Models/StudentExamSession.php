@@ -21,6 +21,9 @@ class StudentExamSession extends Model
         'submitted_at'   => 'datetime',
         'question_order' => 'array',
         'tab_switches'   => 'integer',
+        'user_id'        => 'integer',
+        'exam_id'        => 'integer',
+        'attempt_number' => 'integer',
     ];
 
     public function user()      { return $this->belongsTo(User::class); }

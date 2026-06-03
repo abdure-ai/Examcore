@@ -27,7 +27,7 @@ class CertificateController extends Controller
     public function download(Request $request, Certificate $certificate)
     {
         $user = $request->user();
-        if ($certificate->user_id !== $user->id && !$user->isInstructor() && !$user->isSuperAdmin()) {
+        if ((int) $certificate->user_id !== (int) $user->id && !$user->isInstructor() && !$user->isSuperAdmin()) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 

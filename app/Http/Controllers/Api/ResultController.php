@@ -33,7 +33,7 @@ class ResultController extends Controller
     public function show(Request $request, Result $result)
     {
         $user = $request->user();
-        if ($result->user_id !== $user->id && !$user->isInstructor() && !$user->isSuperAdmin()) {
+        if ((int) $result->user_id !== (int) $user->id && !$user->isInstructor() && !$user->isSuperAdmin()) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
@@ -69,7 +69,7 @@ class ResultController extends Controller
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
-        if ($user->isInstructor() && $exam->instructor_id !== $user->id) {
+        if ($user->isInstructor() && (int) $exam->instructor_id !== (int) $user->id) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
