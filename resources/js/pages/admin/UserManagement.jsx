@@ -13,9 +13,11 @@ export default function UserManagement() {
   const [users, setUsers]           = useState([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages]   = useState(1);
+  const [total, setTotal]             = useState(0);
 
   // ── Create / Edit modal ─────────────────────────────────────────────────────
   const [modalOpen, setModalOpen]   = useState(false);
@@ -47,10 +49,11 @@ export default function UserManagement() {
     setLoading(true);
     try {
       const res = await axios.get('/api/users', {
-        params: { page: currentPage, search: search || undefined, role: roleFilter || undefined },
+        params: { page: currentPage, search: debouncedSearch || undefined, role: roleFilter || undefined },
       });
       setUsers(res.data.data);
       setTotalPages(res.data.last_page);
+      setTotal(res.data.total);
     } catch {
       toast.error('Failed to load users.');
     } finally {
@@ -58,7 +61,18 @@ export default function UserManagement() {
     }
   };
 
-  useEffect(() => { fetchUsers(); }, [currentPage, roleFilter]);
+  // Debounce the search box: wait 350ms after the user stops typing, then
+  // reset to page 1 and apply the new term.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setCurrentPage(1);
+      setDebouncedSearch(search.trim());
+    }, 350);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  // Fetch whenever the page, role filter, or debounced search changes.
+  useEffect(() => { fetchUsers(); }, [currentPage, roleFilter, debouncedSearch]);
 
   // ── Create / Edit ───────────────────────────────────────────────────────────
 
@@ -233,18 +247,28 @@ export default function UserManagement() {
 
       {/* Filters */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 flex flex-wrap gap-3 items-center shadow-sm">
-        <div className="flex gap-2 flex-1 min-w-0">
+        <div className="relative flex-1 min-w-0">
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
           <input
             type="text"
             placeholder="Search name, username or email…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (setCurrentPage(1), fetchUsers())}
-            className="flex-1 min-w-0 px-4 py-2 border rounded-xl bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="w-full pl-10 pr-9 py-2 border rounded-xl bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
           />
-          <button onClick={() => { setCurrentPage(1); fetchUsers(); }} className="bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl text-sm font-semibold">
-            Search
-          </button>
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              title="Clear search"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
         <select
           value={roleFilter}
@@ -266,6 +290,8 @@ export default function UserManagement() {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}
+        total={total}
+        emptyMessage={debouncedSearch ? `No users match "${debouncedSearch}".` : 'No users found.'}
         renderRow={(user) => (
           <tr key={user.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
             <td className="px-6 py-4 font-semibold text-slate-800 dark:text-slate-100">{user.name}</td>
