@@ -67,7 +67,7 @@ class ExamSessionController extends Controller
         // 5. Create new session
         return DB::transaction(function () use ($user, $exam, $attemptCount, $request) {
             $startedAt = now();
-            $expiresAt = $startedAt->copy()->addMinutes($exam->duration_minutes);
+            $expiresAt = $startedAt->copy()->addMinutes((int) $exam->duration_minutes);
 
             // Fetch questions and potentially randomize
             $questions = $exam->cachedQuestions();

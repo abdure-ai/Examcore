@@ -22,11 +22,13 @@ class Exam extends Model
     protected $appends = ['has_passcode'];
 
     protected $casts = [
-        'settings'  => 'array',
-        'start_at'  => 'datetime',
-        'end_at'    => 'datetime',
-        'passing_score' => 'integer',
-        'max_attempts'  => 'integer',
+        'settings'        => 'array',
+        'start_at'        => 'datetime',
+        'end_at'          => 'datetime',
+        'passing_score'   => 'integer',
+        'max_attempts'    => 'integer',
+        'duration_minutes'=> 'integer',
+        'instructor_id'   => 'integer',
     ];
 
     // ── Boot: auto-generate slug ──────────────────────────────────────────
@@ -106,7 +108,7 @@ class Exam extends Model
     public function cachedQuestions(): \Illuminate\Support\Collection
     {
         $key = "exam:{$this->id}:questions";
-        $json = \Cache::remember($key, now()->addMinutes($this->duration_minutes), function () {
+        $json = \Cache::remember($key, now()->addMinutes((int) $this->duration_minutes), function () {
             return $this->questions()->get()->toJson();
         });
         return collect(json_decode($json));
